@@ -16,6 +16,7 @@ on conflict (name) do nothing;
 -- מאפשר להוסיף כל מקצוע חדש במקום רשימה סגורה מראש.
 alter table public.professionals drop constraint if exists professionals_service_check;
 alter table public.service_requests drop constraint if exists service_requests_service_check;
+alter table public.professionals add column if not exists icon text not null default '🛠️';
 
 alter table public.service_requests add column if not exists professional_id uuid references public.professionals(id);
 alter table public.service_requests add column if not exists quoted_price numeric(10,2);
