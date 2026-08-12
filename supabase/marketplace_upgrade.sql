@@ -17,6 +17,7 @@ on conflict (name) do nothing;
 alter table public.professionals drop constraint if exists professionals_service_check;
 alter table public.service_requests drop constraint if exists service_requests_service_check;
 alter table public.professionals add column if not exists icon text not null default '🛠️';
+alter table public.professionals add column if not exists is_active boolean not null default true;
 
 alter table public.service_requests add column if not exists professional_id uuid references public.professionals(id);
 alter table public.service_requests add column if not exists quoted_price numeric(10,2);
@@ -41,9 +42,15 @@ create policy "Administrators can manage requests"
 on public.service_requests for all to authenticated
 using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "Administrators can update professionals" on public.professionals;
+create policy "Administrators can update professionals"
+on public.professionals for update to authenticated
+using (public.is_admin()) with check (public.is_admin());
+
 grant select on public.service_categories to anon, authenticated;
 grant insert, update, delete on public.service_categories to authenticated;
 grant select, update on public.service_requests to authenticated;
+grant update on public.professionals to authenticated;
 
 -- שלבי עבודה מותרים לשימוש בממשק:
 -- ממתין להצעות → הצעה נשלחה → הלקוח אישר → בדרך → בוצע → אושר על ידי הלקוח → עמלה לתשלום
