@@ -21,6 +21,11 @@ alter table public.professionals add column if not exists is_active boolean not 
 
 alter table public.service_requests add column if not exists professional_id uuid references public.professionals(id);
 alter table public.service_requests add column if not exists customer_name text;
+alter table public.service_requests add column if not exists customer_rating smallint check (customer_rating between 1 and 5);
+alter table public.service_requests add column if not exists billing_status text not null default 'טרם נקבע';
+alter table public.service_requests drop constraint if exists service_requests_billing_status_check;
+alter table public.service_requests add constraint service_requests_billing_status_check
+check (billing_status in ('טרם נקבע', 'חינם (ניסיון)', 'ממתין לתשלום בעל מקצוע', 'שולם', 'לא לחיוב'));
 alter table public.service_requests add column if not exists quoted_price numeric(10,2);
 alter table public.service_requests add column if not exists platform_fee numeric(10,2);
 alter table public.service_requests add column if not exists customer_confirmed_at timestamptz;
@@ -66,3 +71,4 @@ grant update on public.professionals to authenticated;
 
 -- שלבי עבודה מותרים לשימוש בממשק:
 -- חדש → בטיפול → נשלח לבעל מקצוע → התקבלה הצעה → הלקוח אישר → בדרך → בוצע → אושר על ידי הלקוח → עמלה לתשלום
+-- כלל חיוב: שלוש עבודות עם אישור לקוח ודירוג 4–5 הן תקופת ניסיון ללא תשלום.
