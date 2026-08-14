@@ -44,6 +44,13 @@ check (status in ('חדש', 'בטיפול', 'נשלח לבעל מקצוע', 'ה�
 
 alter table public.service_categories enable row level security;
 
+-- לקוחות יכולים רק ליצור ליד; הם אינם יכולים לקרוא לידים של לקוחות אחרים.
+drop policy if exists "Public can create service requests" on public.service_requests;
+create policy "Public can create service requests"
+on public.service_requests for insert
+to anon, authenticated
+with check (true);
+
 drop policy if exists "Public can view active categories" on public.service_categories;
 create policy "Public can view active categories"
 on public.service_categories for select to anon, authenticated
@@ -68,6 +75,7 @@ grant select on public.service_categories to anon, authenticated;
 grant insert, update, delete on public.service_categories to authenticated;
 grant select, update on public.service_requests to authenticated;
 grant update on public.professionals to authenticated;
+grant insert on public.service_requests to anon, authenticated;
 
 -- שלבי עבודה מותרים לשימוש בממשק:
 -- חדש → בטיפול → נשלח לבעל מקצוע → התקבלה הצעה → הלקוח אישר → בדרך → בוצע → אושר על ידי הלקוח → עמלה לתשלום
