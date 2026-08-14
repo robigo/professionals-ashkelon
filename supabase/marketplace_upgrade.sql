@@ -20,10 +20,14 @@ alter table public.professionals add column if not exists icon text not null def
 alter table public.professionals add column if not exists is_active boolean not null default true;
 
 alter table public.service_requests add column if not exists professional_id uuid references public.professionals(id);
+alter table public.service_requests add column if not exists customer_name text;
 alter table public.service_requests add column if not exists quoted_price numeric(10,2);
 alter table public.service_requests add column if not exists platform_fee numeric(10,2);
 alter table public.service_requests add column if not exists customer_confirmed_at timestamptz;
 alter table public.service_requests add column if not exists completed_at timestamptz;
+alter table public.service_requests drop constraint if exists service_requests_status_check;
+alter table public.service_requests add constraint service_requests_status_check
+check (status in ('חדש', 'בטיפול', 'נשלח לבעל מקצוע', 'התקבלה הצעה', 'הלקוח אישר', 'בדרך', 'בוצע', 'אושר על ידי הלקוח', 'עמלה לתשלום', 'בוטל'));
 
 alter table public.service_categories enable row level security;
 
@@ -53,4 +57,4 @@ grant select, update on public.service_requests to authenticated;
 grant update on public.professionals to authenticated;
 
 -- שלבי עבודה מותרים לשימוש בממשק:
--- ממתין להצעות → הצעה נשלחה → הלקוח אישר → בדרך → בוצע → אושר על ידי הלקוח → עמלה לתשלום
+-- חדש → בטיפול → נשלח לבעל מקצוע → התקבלה הצעה → הלקוח אישר → בדרך → בוצע → אושר על ידי הלקוח → עמלה לתשלום
