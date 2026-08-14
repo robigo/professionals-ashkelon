@@ -25,7 +25,15 @@ alter table public.service_requests add column if not exists quoted_price numeri
 alter table public.service_requests add column if not exists platform_fee numeric(10,2);
 alter table public.service_requests add column if not exists customer_confirmed_at timestamptz;
 alter table public.service_requests add column if not exists completed_at timestamptz;
+-- ממיר סטטוסים ישנים לפני אכיפת רשימת הסטטוסים החדשה.
 alter table public.service_requests drop constraint if exists service_requests_status_check;
+update public.service_requests
+set status = case status
+  when 'ממתין להצעות' then 'חדש'
+  when 'אושר' then 'הלקוח אישר'
+  when 'הושלם' then 'בוצע'
+  else status
+end;
 alter table public.service_requests add constraint service_requests_status_check
 check (status in ('חדש', 'בטיפול', 'נשלח לבעל מקצוע', 'התקבלה הצעה', 'הלקוח אישר', 'בדרך', 'בוצע', 'אושר על ידי הלקוח', 'עמלה לתשלום', 'בוטל'));
 
